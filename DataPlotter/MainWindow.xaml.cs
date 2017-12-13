@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Forms;
 using System.Threading;
 using System.IO;
 using OxyPlot;
@@ -19,10 +20,11 @@ using OxyPlot.Series;
 
 namespace DataPlotter
 {
-    
+
     public class MainViewModel
     {
         public static Thread thread;
+        string dir = "";
         private void updatePlot()
         {
             this.MyModel = new PlotModel { Title = "" };
@@ -36,7 +38,7 @@ namespace DataPlotter
                 int length = 0;
                 try
                 {
-                    using (var fs = new FileStream(System.IO.Directory.GetCurrentDirectory() + @"/data.txt", FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
+                    using (var fs = new FileStream(dir, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
                     using (var reader = new StreamReader(fs))
                     {
                         while (!reader.EndOfStream)
@@ -45,7 +47,7 @@ namespace DataPlotter
                             var line = reader.ReadLine();
                         }
                     }
-                    using (var fs = new FileStream(System.IO.Directory.GetCurrentDirectory() + @"/data.txt", FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
+                    using (var fs = new FileStream(dir, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
                     using (var reader = new StreamReader(fs))
                     {
                         while (!reader.EndOfStream)
@@ -53,7 +55,7 @@ namespace DataPlotter
                             i++;
                             var line = reader.ReadLine();
 
-                            if (!String.IsNullOrWhiteSpace(line) && i>length-10000)
+                            if (!String.IsNullOrWhiteSpace(line) && i > length - 1000)
                                 try
                                 {
                                     series.Points.Add(new DataPoint(i, Convert.ToDouble(line)));
@@ -73,7 +75,11 @@ namespace DataPlotter
                         }
                     }
                 }
-                    catch (IOException)
+                catch (IOException)
+                {
+                    series.Points.Add(new DataPoint(i, 0));
+                }
+                catch(System.ArgumentException)
                 {
                     series.Points.Add(new DataPoint(i, 0));
                 }
@@ -83,6 +89,19 @@ namespace DataPlotter
         }
         public MainViewModel()
         {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+
+            openFileDialog.InitialDirectory = "c:\\";
+            openFileDialog.RestoreDirectory = true;
+
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    dir = openFileDialog.FileName;
+                }
+                catch (Exception) { }
+            }
             thread = new Thread(new ThreadStart(updatePlot));
             thread.Start();
         }
