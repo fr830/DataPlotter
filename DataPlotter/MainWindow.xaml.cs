@@ -28,6 +28,7 @@ namespace DataPlotter
         private void updatePlot()
         {
             this.MyModel = new PlotModel { Title = "" };
+			this.Controller= null;
             LineSeries series = new LineSeries();
             this.MyModel.Series.Add(series);
             bool first = true;
@@ -107,11 +108,9 @@ namespace DataPlotter
         }
 
         public PlotModel MyModel { get; private set; }
+        public IPlotController Controller { get; private set; }
     }
 
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         public MainWindow()
